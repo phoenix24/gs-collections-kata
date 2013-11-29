@@ -22,6 +22,7 @@ import com.gs.collections.impl.list.mutable.FastList;
 import com.gs.collections.impl.test.Verify;
 import org.junit.Assert;
 import org.junit.Test;
+import com.gs.collections.api.block.predicate.Predicate;
 
 public class Exercise1Test extends CompanyDomainForKata
 {
@@ -41,7 +42,7 @@ public class Exercise1Test extends CompanyDomainForKata
          * Get the name of each of the company's customers.
          */
         MutableList<Customer> customers = this.company.getCustomers();
-        MutableList<String> customerNames = null;
+        MutableList<String> customerNames = customers.collect(nameFunction);
 
         MutableList<String> expectedNames = FastList.newListWith("Fred", "Mary", "Bill");
         Assert.assertEquals(expectedNames, customerNames);
@@ -55,8 +56,15 @@ public class Exercise1Test extends CompanyDomainForKata
          * much as possible. Ctrl+space will help you implement an anonymous inner class. Implementing an interface is
          * ctrl+i in IntelliJ. Eclipse's ctrl+1 is auto-fix and works to implement interfaces.
          */
+        Function<Customer, String> cityFunction = new Function<Customer, String>() {
+            @Override
+            public String valueOf(Customer customer) {
+                return customer.getCity();
+            }
+        };
+
         MutableList<Customer> customers = this.company.getCustomers();
-        MutableList<String> customerCities = null;
+        MutableList<String> customerCities = customers.collect(cityFunction);
 
         MutableList<String> expectedCities = FastList.newListWith("London", "Liphook", "London");
         Assert.assertEquals(expectedCities, customerCities);
@@ -68,8 +76,22 @@ public class Exercise1Test extends CompanyDomainForKata
         /**
          * Which customers come from London? Get a collection of those which do. Use an anonymous inner class.
          */
+        Function<Customer, Customer> cityFunction = new Function<Customer, Customer>() {
+            @Override
+            public Customer valueOf(Customer customer) {
+                return customer;
+            }
+        };
+
+        Predicate<Customer> matcher = new Predicate<Customer>() {
+            @Override
+            public boolean accept(Customer customer) {
+                return customer.getCity().equalsIgnoreCase("london");
+            }
+        };
+
         MutableList<Customer> customers = this.company.getCustomers();
-        MutableList<Customer> customersFromLondon = null;
+        MutableList<Customer> customersFromLondon = customers.collectIf(matcher, cityFunction);
         Verify.assertSize("Should be 2 London customers", 2, customersFromLondon);
     }
 }

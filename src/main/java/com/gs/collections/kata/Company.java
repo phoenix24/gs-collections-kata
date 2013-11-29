@@ -16,10 +16,13 @@
 
 package com.gs.collections.kata;
 
+import com.gs.collections.api.block.function.Function;
 import com.gs.collections.api.block.predicate.Predicate;
 import com.gs.collections.api.list.MutableList;
 import com.gs.collections.impl.list.mutable.FastList;
 import org.junit.Assert;
+
+import java.util.List;
 
 /**
  * A company has a {@link MutableList} of {@link Customer}s.  It has an array of {@link Supplier}s, and a name.
@@ -28,6 +31,12 @@ public class Company
 {
     private final String name;
     private final MutableList<Customer> customers = FastList.newList();
+    private final Function<Customer, List<Order>> CUSTOMER_ORDER = new Function<Customer, List<Order>>() {
+        @Override
+        public List<Order> valueOf(Customer object) {
+            return object.getOrders();
+        }
+    };
 
     // suppliers are array based.
     private Supplier[] suppliers = new Supplier[0];
@@ -54,13 +63,7 @@ public class Company
 
     public MutableList<Order> getOrders()
     {
-        Assert.fail("Refactor this code to use GS Collections as part of Exercise 4");
-        MutableList<Order> orders = FastList.newList();
-        for (Customer customer : this.customers)
-        {
-            orders.addAll(customer.getOrders());
-        }
-        return orders;
+        return this.customers.flatCollect(CUSTOMER_ORDER);
     }
 
     public Customer getMostRecentCustomer()
@@ -84,12 +87,26 @@ public class Company
         return this.suppliers;
     }
 
-    public Customer getCustomerNamed(String name)
+    public Customer getCustomerNamed(final String name)
     {
         /**
          * Use a {@link Predicate} to find a {@link Customer} with the name given.
          */
-        Assert.fail("Implement this method as part of Exercise 3");
-        return null;
+        Predicate<Customer> findCustomer = new Predicate<Customer>() {
+            @Override
+            public boolean accept(Customer customer) {
+                return customer.getName().equalsIgnoreCase(name);
+            }
+        };
+        return customers.detect(findCustomer);
+    }
+
+    public MutableList<String> getCustomerNames() {
+         return customers.collect(new Function<Customer, String>() {
+            @Override
+            public String valueOf(Customer customer) {
+                return customer.getName();
+            }
+        });
     }
 }

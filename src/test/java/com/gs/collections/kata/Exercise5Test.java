@@ -18,6 +18,7 @@ package com.gs.collections.kata;
 
 import java.util.List;
 
+import com.gs.collections.api.block.function.Function;
 import com.gs.collections.api.block.predicate.Predicate;
 import com.gs.collections.api.list.MutableList;
 import com.gs.collections.impl.list.mutable.FastList;
@@ -35,7 +36,14 @@ public class Exercise5Test extends CompanyDomainForKata
     @Test
     public void findSupplierNames()
     {
-        MutableList<String> supplierNames = null;
+        Function<Supplier, String> SUPPLIER_NAMES = new Function<Supplier, String>() {
+            @Override
+            public String valueOf(Supplier object) {
+                return object.getName();
+            }
+        };
+
+        MutableList<String> supplierNames = ArrayIterate.collect(this.company.getSuppliers(), SUPPLIER_NAMES);
 
         MutableList<String> expectedSupplierNames = FastList.newListWith(
                 "Shedtastic",
@@ -55,8 +63,13 @@ public class Exercise5Test extends CompanyDomainForKata
     @Test
     public void countSuppliersWithMoreThanTwoItems()
     {
-        Predicate<Supplier> moreThanTwoItems = null;
-        int suppliersWithMoreThanTwoItems = 0;
+        Predicate<Supplier> moreThanTwoItems = new Predicate<Supplier>() {
+            @Override
+            public boolean accept(Supplier supplier) {
+                return supplier.getItemNames().length > 2;
+            }
+        };
+        int suppliersWithMoreThanTwoItems = ArrayIterate.count(this.company.getSuppliers(), moreThanTwoItems);
         Assert.assertEquals("suppliers with more than 2 items", 5, suppliersWithMoreThanTwoItems);
     }
 
@@ -67,10 +80,22 @@ public class Exercise5Test extends CompanyDomainForKata
     public void whoSuppliesSandwichToaster()
     {
         // Create a Predicate that will check to see if a Supplier supplies a "sandwich toaster".
-        Predicate<Supplier> suppliesToaster = null;
+        final Predicate<String> hasItem = new Predicate<String>() {
+            @Override
+            public boolean accept(String each) {
+                return each.toLowerCase().contains("sandwich toaster");
+            }
+        };
+
+        final Predicate<Supplier> suppliesToaster = new Predicate<Supplier>() {
+            @Override
+            public boolean accept(Supplier each) {
+                return ArrayIterate.anySatisfy(each.getItemNames(), hasItem);
+            }
+        };
 
         // Find one supplier that supplies toasters.
-        Supplier toasterSupplier = null;
+        Supplier toasterSupplier = ArrayIterate.detect(this.company.getSuppliers(), suppliesToaster);
         Assert.assertNotNull("toaster supplier", toasterSupplier);
         Assert.assertEquals("Doxins", toasterSupplier.getName());
     }
@@ -82,8 +107,18 @@ public class Exercise5Test extends CompanyDomainForKata
         /**
          * Get the order values that are greater than 1.5.
          */
-        MutableList<Double> orderValues = null;
-        MutableList<Double> filtered = null;
+        MutableList<Double> orderValues = FastList.newList(orders).collect(new Function<Order, Double>() {
+            @Override
+            public Double valueOf(Order object) {
+                return object.getValue();
+            }
+        });
+        MutableList<Double> filtered = orderValues.select(new Predicate<Double>() {
+            @Override
+            public boolean accept(Double each) {
+                return each > 1.5;
+            }
+        });
         Assert.assertEquals(FastList.newListWith(372.5, 1.75), filtered);
     }
 
@@ -94,7 +129,12 @@ public class Exercise5Test extends CompanyDomainForKata
         /**
          * Get the actual orders (not their double values) where those orders have a value greater than 2.0.
          */
-        MutableList<Order> filtered = null;
+        MutableList<Order> filtered = FastList.newList(orders).select(new Predicate<Order>() {
+            @Override
+            public boolean accept(Order each) {
+                return each.getValue() > 2.0;
+            }
+        });
         Assert.assertEquals(FastList.newListWith(Iterate.getFirst(this.company.getMostRecentCustomer().getOrders())), filtered);
     }
 }

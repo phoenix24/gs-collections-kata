@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.gs.collections.api.block.function.Function;
+import com.gs.collections.api.block.predicate.Predicate;
 import com.gs.collections.api.list.MutableList;
 import com.gs.collections.impl.block.function.AddFunction;
+import com.gs.collections.impl.list.mutable.FastList;
 import com.gs.collections.impl.utility.ListIterate;
 import org.junit.Assert;
 
@@ -35,12 +37,30 @@ public class Customer
         @Override
         public String valueOf(Customer customer)
         {
-            Assert.fail("Replace with the implementation of the Function.");
-            return null;
+            return customer.getName();
         }
     };
 
-    public static final Function<Customer, String> TO_CITY = null;
+    public static final Function<Customer, String> TO_CITY = new Function<Customer, String>() {
+        @Override
+        public String valueOf(Customer customer) {
+            return customer.getCity();
+        }
+    };
+
+    public static final Function<Customer, Customer> IDENTITY = new Function<Customer, Customer>() {
+        @Override
+        public Customer valueOf(Customer customer) {
+            return customer;
+        }
+    };
+
+    public static final Predicate<Customer> FROM_LONDON = new Predicate<Customer>() {
+        @Override
+        public boolean accept(Customer each) {
+            return each.getCity().equalsIgnoreCase("london");
+        }
+    };
 
     public static final Function<Customer, Double> TO_TOTAL_ORDER_VALUE =
             new Function<Customer, Double>()
@@ -55,7 +75,7 @@ public class Customer
     private final String name;
     private final String city;
 
-    private final List<Order> orders = new ArrayList<Order>();
+    private final MutableList<Order> orders = FastList.newList();
 
     public Customer(String name, String city)
     {
@@ -73,7 +93,7 @@ public class Customer
         return this.name;
     }
 
-    public List<Order> getOrders()
+    public MutableList<Order> getOrders()
     {
         return this.orders;
     }

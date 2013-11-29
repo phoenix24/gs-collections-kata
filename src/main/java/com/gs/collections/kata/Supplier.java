@@ -61,4 +61,8 @@ public class Supplier
     {
         return this.itemNames;
     }
+
+    public String toString() {
+        return this.name;
+    }
 }
