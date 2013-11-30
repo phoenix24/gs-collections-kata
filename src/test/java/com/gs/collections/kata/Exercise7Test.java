@@ -17,6 +17,7 @@
 package com.gs.collections.kata;
 
 import com.gs.collections.api.block.function.Function;
+import com.gs.collections.api.block.procedure.Procedure;
 import com.gs.collections.api.list.MutableList;
 import com.gs.collections.impl.block.factory.Predicates;
 import com.gs.collections.impl.test.Verify;
@@ -96,6 +97,21 @@ public class Exercise7Test extends CompanyDomainForKata
     @Test
     public void deliverOrdersToLondon()
     {
+        Function<Customer, MutableList<Order>> ORDERS = new Function<Customer, MutableList<Order>>() {
+            @Override
+            public MutableList<Order> valueOf(Customer object) {
+                return object.getOrders();
+            }
+        };
+
+        MutableList<Customer> customers = this.company.getCustomers().select(Customer.FROM_LONDON);
+        customers.flatCollect(ORDERS).forEach(new Procedure<Order>() {
+            @Override
+            public void value(Order each) {
+                each.deliver();
+            }
+        });
+
         Verify.assertAllSatisfy(this.company.getCustomerNamed("Fred").getOrders(), Order.IS_DELIVERED);
         Verify.assertAllSatisfy(this.company.getCustomerNamed("Mary").getOrders(), Predicates.not(Order.IS_DELIVERED));
         Verify.assertAllSatisfy(this.company.getCustomerNamed("Bill").getOrders(), Order.IS_DELIVERED);
