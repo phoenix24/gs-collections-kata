@@ -16,13 +16,24 @@
 
 package com.gs.collections.kata;
 
+import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Map;
 
+import com.gs.collections.api.block.function.Function;
+import com.gs.collections.api.block.function.Function0;
 import com.gs.collections.api.block.procedure.Procedure;
+import com.gs.collections.api.map.ImmutableMap;
 import com.gs.collections.api.map.MutableMap;
+import com.gs.collections.api.multimap.MutableMultimap;
 import com.gs.collections.api.multimap.list.MutableListMultimap;
+import com.gs.collections.api.tuple.Pair;
+import com.gs.collections.impl.factory.Lists;
+import com.gs.collections.impl.factory.Maps;
+import com.gs.collections.impl.factory.Multimaps;
 import com.gs.collections.impl.list.mutable.FastList;
 import com.gs.collections.impl.map.mutable.UnifiedMap;
+import com.gs.collections.impl.multimap.list.FastListMultimap;
 import com.gs.collections.impl.test.Verify;
 import com.gs.collections.impl.utility.ArrayIterate;
 import org.junit.Assert;
@@ -37,7 +48,12 @@ public class Exercise8Test extends CompanyDomainForKata
     public void customersByCity()
     {
         // Notice that the second generic type is Customer, not List<Customer>
-        MutableListMultimap<String, Customer> multimap = null;
+        MutableListMultimap<String, Customer> multimap = this.company.getCustomers().groupBy(new Function<Customer, String>() {
+            @Override
+            public String valueOf(Customer customer) {
+                return customer.getCity();
+            }
+        });
 
         Assert.assertEquals(FastList.newListWith(this.company.getCustomerNamed("Mary")), multimap.get("Liphook"));
         Assert.assertEquals(
